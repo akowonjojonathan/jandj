@@ -89,17 +89,47 @@ const complaintSchema = z.object({
 });
 type ComplaintFormValues = z.infer<typeof complaintSchema>;
 
-const navItems = [
+const publicNavItems = [
   { href: '/', label: 'Home' },
   { href: '/rooms', label: 'Rooms' },
   { href: '/report', label: 'Report an issue' },
   { href: '/manager', label: 'Manager access' },
 ];
+const managerNavItems = [
+  { href: '#manager-overview', label: 'Overview' },
+  { href: '#manager-reports', label: 'Visitor reports' },
+  { href: '#manager-notices', label: 'Notice board' },
+  { href: '#manager-rooms', label: 'Room availability' },
+];
 
-function AppShell({ children }: { children: ReactNode }) {
+function AppShell({ children, managerMode, onSignOut }: { children: ReactNode; managerMode: boolean; onSignOut: () => void }) {
   const [location] = useLocation();
   const [mobileMenu, setMobileMenu] = useState(false);
   useEffect(() => setMobileMenu(false), [location]);
+  function renderNavItems(mobile: boolean) {
+    const linkClass = mobile
+      ? 'block border-b border-[#d5cebf] px-2 py-3 text-sm font-semibold text-[#625e54]'
+      : 'border-b-2 border-transparent px-3 py-3 text-[12px] font-semibold text-[#625e54]';
+    if (managerMode) {
+      return <>
+        {managerNavItems.map(({ href, label }) => <a key={href} href={href}
+          data-testid={`${mobile ? 'link-mobile' : 'link-nav'}-${label.toLowerCase().replaceAll(' ', '-')}`}
+          onClick={() => setMobileMenu(false)} className={linkClass}>{label}</a>)}
+        <button type="button" onClick={onSignOut}
+          data-testid={mobile ? 'button-mobile-sign-out' : 'button-nav-sign-out'}
+          className={mobile
+            ? 'mt-3 w-full border border-[#234633] px-3 py-3 text-left text-sm font-bold text-[#234633]'
+            : 'ml-1 border border-[#234633] px-3 py-2.5 text-[12px] font-bold text-[#234633]'}>
+          Sign out
+        </button>
+      </>;
+    }
+    return publicNavItems.map(({ href, label }) => <Link key={href} href={href}
+      data-testid={`${mobile ? 'link-mobile' : 'link-nav'}-${label.toLowerCase().replaceAll(' ', '-')}`}
+      className={`${linkClass} ${location === href ? 'border-[#9a563d] text-[#234633]' : ''}`}>
+      {label}
+    </Link>);
+  }
   return <div className="min-h-[100dvh] bg-[#eee9dd] text-[#1d3529]">
     <header className="sticky top-0 z-40 border-b border-[#c9c1b1] bg-[#eee9dd]">
       <div className="mx-auto flex min-h-[76px] max-w-[1240px] items-center justify-between px-5 md:px-9">
@@ -110,12 +140,8 @@ function AppShell({ children }: { children: ReactNode }) {
             <span className="mt-1 block text-[9px] font-bold uppercase tracking-[.19em] text-[#775344]">A good place to grow</span>
           </span>
         </Link>
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
-          {navItems.map(({ href, label }) => <Link key={href} href={href}
-            data-testid={`link-nav-${label.toLowerCase().replaceAll(' ', '-')}`}
-            className={`border-b-2 px-4 py-3 text-[13px] font-semibold ${location === href ? 'border-[#9a563d] text-[#234633]' : 'border-transparent text-[#625e54]'}`}>
-            {label}
-          </Link>)}
+        <nav className="hidden items-center gap-1 md:flex" aria-label={managerMode ? 'Manager navigation' : 'Main navigation'}>
+          {renderNavItems(false)}
         </nav>
         <button type="button" onClick={() => setMobileMenu(!mobileMenu)} aria-expanded={mobileMenu}
           aria-label={mobileMenu ? 'Close navigation menu' : 'Open navigation menu'} data-testid="button-mobile-menu"
@@ -123,9 +149,8 @@ function AppShell({ children }: { children: ReactNode }) {
           {mobileMenu ? 'Close' : 'Menu'}
         </button>
       </div>
-      {mobileMenu && <nav className="border-t border-[#c9c1b1] bg-[#e8e2d5] px-5 py-3 md:hidden" aria-label="Mobile navigation">
-        {navItems.map(({ href, label }) => <Link key={href} href={href} data-testid={`link-mobile-${label.toLowerCase().replaceAll(' ', '-')}`}
-          className={`block border-b border-[#d5cebf] px-2 py-3 text-sm font-semibold ${location === href ? 'text-[#234633]' : 'text-[#625e54]'}`}>{label}</Link>)}
+      {mobileMenu && <nav className="border-t border-[#c9c1b1] bg-[#e8e2d5] px-5 py-3 md:hidden" aria-label={managerMode ? 'Manager navigation' : 'Mobile navigation'}>
+        {renderNavItems(true)}
       </nav>}
     </header>
     <main>{children}</main>
@@ -288,10 +313,10 @@ function ManagerLogin({ onLogin }: { onLogin: () => void }) {
   </div>;
 }
 
-function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNotice, rooms, onToggleRoom, onLogout }: {
+function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNotice, rooms, onToggleRoom }: {
   complaints: Complaint[]; onStatus: (id: string, status: ReportStatus) => void;
   notices: Notice[]; onSaveNotice: (notice: Notice) => void; onDeleteNotice: (id: string) => void;
-  rooms: Room[]; onToggleRoom: (number: number) => void; onLogout: () => void;
+  rooms: Room[]; onToggleRoom: (number: number) => void;
 }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -313,17 +338,16 @@ function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNoti
     onSaveNotice({ id: editingId || `notice-${Date.now()}`, tag: tag.trim().toUpperCase(), title: title.trim(), body: body.trim(), date: new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date()) });
     resetNoticeForm();
   }
-  return <div className="mx-auto max-w-[1240px] px-5 pt-10 md:px-9 md:pt-14">
+  return <div id="manager-overview" className="mx-auto max-w-[1240px] px-5 pt-10 md:px-9 md:pt-14">
     <div className="flex flex-col justify-between gap-3 border-b border-[#c9c1b1] pb-6 sm:flex-row sm:items-end">
       <div><p className="mb-2 text-[10px] font-bold uppercase tracking-[.2em] text-[#925039]">HOSTEL OPERATIONS</p><h1 className="serif text-[38px] font-semibold leading-tight tracking-[-.04em] text-[#20392b] sm:text-[48px]">Manager dashboard</h1><p className="mt-3 text-sm text-[#5e6258]">Reports, notices, and room availability for this browser demo.</p></div>
-      <button type="button" onClick={onLogout} data-testid="button-manager-logout" className="w-fit border border-[#234633] px-4 py-2.5 text-xs font-bold text-[#234633] focus:outline-none focus:ring-2 focus:ring-[#53745b]">Sign out</button>
     </div>
     <div className="my-6 border-y border-[#b7ad9b] bg-[#e6e0d3] px-5 py-4 text-xs leading-5 text-[#626257]" data-testid="text-demo-limitation">Demo-only access gate. This is not real security. Data persists in this browser only and does not sync across devices.</div>
     <div className="mb-8 grid grid-cols-2 gap-3 sm:max-w-[500px]">
       <div className="border border-[#c9c1b1] bg-[#e8e2d5] p-5"><p className="text-[10px] font-bold uppercase tracking-[.13em] text-[#68655a]">NEW REPORTS</p><p className="serif mt-2 text-[34px] font-semibold tracking-[-.05em] text-[#2c4637]" data-testid="text-new-report-count">{newCount}</p></div>
       <div className="border border-[#c9c1b1] bg-[#e8e2d5] p-5"><p className="text-[10px] font-bold uppercase tracking-[.13em] text-[#68655a]">AVAILABLE ROOMS</p><p className="serif mt-2 text-[34px] font-semibold tracking-[-.05em] text-[#2c4637]" data-testid="text-available-room-count">{availableCount}<span className="ml-1 text-base font-medium text-[#68655a]">/ 67</span></p></div>
     </div>
-    <section className="mb-10 border border-[#c9c1b1] bg-[#e8e2d5]" aria-labelledby="reports-heading">
+    <section id="manager-reports" className="mb-10 border border-[#c9c1b1] bg-[#e8e2d5]" aria-labelledby="reports-heading">
       <div className="border-b border-[#c9c1b1] px-5 py-5 sm:px-7"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 id="reports-heading" className="serif text-[22px] font-semibold text-[#263a2d]">Visitor reports</h2><p className="mt-1 text-xs text-[#68655a]">Review each issue and update its progress.</p></div><span className="border border-[#bdb5a5] px-3 py-1.5 text-[10px] font-bold text-[#53594e]" data-testid="status-report-count">{complaints.length} reports</span></div>
         <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_190px]">
           <label className="sr-only" htmlFor="report-search">Search reports</label><Input id="report-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search room, category, or description" data-testid="input-report-search" className="h-auto rounded-none border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm" />
@@ -342,7 +366,7 @@ function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNoti
         </table>
       </div> : <div className="px-6 py-12 text-center" data-testid="empty-reports"><p className="text-sm font-bold text-[#4c5147]">{complaints.length ? 'No matching reports' : 'All quiet for now'}</p><p className="mt-1 text-xs text-[#666459]">{complaints.length ? 'Try a different search or status filter.' : 'Visitor reports will appear here when submitted.'}</p></div>}
     </section>
-    <section className="mb-10 grid gap-8 lg:grid-cols-[.85fr_1.15fr]" aria-labelledby="notices-heading">
+    <section id="manager-notices" className="mb-10 grid gap-8 lg:grid-cols-[.85fr_1.15fr]" aria-labelledby="notices-heading">
       <div className="border border-[#c9c1b1] bg-[#e8e2d5] p-5 sm:p-7">
         <h2 id="notices-heading" className="serif text-[22px] font-semibold text-[#263a2d]">{editingId ? 'Edit announcement' : 'Add an announcement'}</h2>
         <p className="mt-1 text-xs text-[#68655a]">Published announcements appear on the public home page.</p>
@@ -358,7 +382,7 @@ function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNoti
         {notices.length ? <div className="divide-y divide-[#d1c9b9]">{notices.map((notice) => <article key={notice.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-7" data-testid={`manager-notice-${notice.id}`}><div className="min-w-0"><span className="text-[9px] font-bold uppercase tracking-[.13em] text-[#925039]">{notice.tag}</span><h3 className="serif mt-1 text-lg font-semibold text-[#263a2d]">{notice.title}</h3><p className="mt-1 text-xs leading-5 text-[#5e6258]">{notice.body}</p></div><div className="flex shrink-0 gap-2"><button type="button" onClick={() => editNotice(notice)} data-testid={`button-edit-notice-${notice.id}`} className="border border-[#8e9a8b] px-3 py-2 text-[11px] font-bold text-[#344638]">Edit</button><button type="button" onClick={() => { onDeleteNotice(notice.id); if (editingId === notice.id) resetNoticeForm(); }} data-testid={`button-delete-notice-${notice.id}`} className="border border-[#bda99d] px-3 py-2 text-[11px] font-bold text-[#824637]">Delete</button></div></article>)}</div> : <p className="px-6 py-10 text-center text-sm text-[#666459]">No announcements yet.</p>}
       </div>
     </section>
-    <section className="mb-16 border border-[#c9c1b1] bg-[#e8e2d5]" aria-labelledby="rooms-heading">
+    <section id="manager-rooms" className="mb-16 border border-[#c9c1b1] bg-[#e8e2d5]" aria-labelledby="rooms-heading">
       <div className="border-b border-[#c9c1b1] px-5 py-5 sm:px-7"><h2 id="rooms-heading" className="serif text-[22px] font-semibold text-[#263a2d]">Room availability</h2><p className="mt-1 text-xs text-[#68655a]">Toggle any room between Available and Occupied. Room numbering stays 1 through 67.</p></div>
       <div className="grid grid-cols-2 gap-px bg-[#c9c1b1] sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {rooms.map((room) => <div key={room.number} className="flex items-center justify-between gap-2 bg-[#e8e2d5] px-3 py-3" data-testid={`manager-room-${room.number}`}><span className="text-xs font-semibold text-[#354638]">Room {room.number}</span><button type="button" onClick={() => onToggleRoom(room.number)} aria-label={`Set Room ${room.number} ${room.status === 'Available' ? 'Occupied' : 'Available'}`} aria-pressed={room.status === 'Available'} data-testid={`button-toggle-room-${room.number}`} className={`min-w-[82px] border px-2 py-1.5 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-[#53745b] ${room.status === 'Available' ? 'border-[#9eac98] text-[#315c3d]' : 'border-[#c4bdaf] text-[#625f55]'}`}>{room.status}</button></div>)}
@@ -372,6 +396,7 @@ function NotFoundPage() {
 }
 
 function Router() {
+  const [location, setLocation] = useLocation();
   const [complaints, setComplaints] = useState<Complaint[]>(readReports);
   const [notices, setNotices] = useState<Notice[]>(() => readStorage(NOTICES_KEY, initialNotices));
   const [rooms, setRooms] = useState<Room[]>(() => {
@@ -385,6 +410,11 @@ function Router() {
     try { return sessionStorage.getItem(SESSION_KEY) === 'signed-in'; } catch { return false; }
   });
   const [toastMessage, setToastMessage] = useState('');
+  useEffect(() => {
+    if (location === '/manager') return;
+    try { sessionStorage.removeItem(SESSION_KEY); } catch { /* The manager view is already hidden outside its route. */ }
+    setManagerAuthenticated(false);
+  }, [location]);
   useEffect(() => writeStorage(STORAGE_KEY, complaints), [complaints]);
   useEffect(() => writeStorage(NOTICES_KEY, notices), [notices]);
   useEffect(() => writeStorage(ROOMS_KEY, rooms), [rooms]);
@@ -405,14 +435,15 @@ function Router() {
   function logout() {
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* Sign out remains available in memory. */ }
     setManagerAuthenticated(false);
+    setLocation('/');
   }
-  return <AppShell>
+  return <AppShell managerMode={managerAuthenticated && location === '/manager'} onSignOut={logout}>
     <Switch>
       <Route path="/"><HomePage notices={notices} /></Route>
       <Route path="/rooms"><RoomsPage rooms={rooms} /></Route>
       <Route path="/report"><ReportPage onAdd={addComplaint} onToast={setToastMessage} /></Route>
       <Route path="/manager">{managerAuthenticated
-        ? <ManagerPage complaints={complaints} onStatus={updateReportStatus} notices={notices} onSaveNotice={saveNotice} onDeleteNotice={deleteNotice} rooms={rooms} onToggleRoom={toggleRoom} onLogout={logout} />
+        ? <ManagerPage complaints={complaints} onStatus={updateReportStatus} notices={notices} onSaveNotice={saveNotice} onDeleteNotice={deleteNotice} rooms={rooms} onToggleRoom={toggleRoom} />
         : <ManagerLogin onLogin={login} />}</Route>
       <Route component={NotFoundPage} />
     </Switch>
