@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "J and J Hostel"
+description = "A polished hostel portal for students to read manager notices, check room availability, submit maintenance complaints, and view an organized manager dashboard."
+version = "1.0.0"
+id = "artifacts/jj-hostel"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25602
+
+[services.development]
+run = "pnpm --filter @workspace/jj-hostel run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/jj-hostel", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/jj-hostel/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25602"
+BASE_PATH = "/"
