@@ -14,6 +14,7 @@ const THEME_KEY = 'jj-hostel-demo-theme';
 // Replace these demo contact details with the hostel's confirmed information.
 const HOSTEL_PHONE = '+233 XX XXX XXXX';
 const HOSTEL_EMAIL = 'manager@example.com';
+const HOSTEL_MAP_URL = 'https://maps.app.goo.gl/ysz6p45BvRzKDSc47';
 const issueCategories = ['Plumbing', 'Electrical', 'Carpentry', 'General'];
 const roomNames = Array.from({ length: 67 }, (_, index) => `Room ${index + 1}`);
 const sampleReports = [
@@ -162,6 +163,9 @@ function AppShell({ children, managerMode, onSignOut }) {
         <div>
           <p className="font-semibold tracking-wide text-[#344638]">J &amp; J Hostel <span className="font-normal text-[#775d4c]">· Accra, Ghana</span></p>
           <p className="mt-2">A comfortable place to study and settle in.</p>
+          <a href={HOSTEL_MAP_URL} target="_blank" rel="noopener noreferrer" data-testid="link-hostel-map"
+            aria-label="View the J and J Hostel location on Google Maps, opens in a new tab"
+            className="mt-2 inline-block border-b border-[#8e9a8b] pb-1 font-semibold text-[#344638]">View on Google Maps</a>
         </div>
         <div>
           <p className="font-bold uppercase tracking-[.14em] text-[#925039]">Contact the hostel</p>
