@@ -1,1 +1,2 @@
 - [J&J Hostel product constraints](jj-hostel-product-constraints.md) — Preserve rooms 1–67 and the user's visual exclusions for this site.
+- [J&J Hostel code preference](jj-hostel-code-preference.md) — Keep the live app source in standard JavaScript/JSX because the user has not learned TypeScript.

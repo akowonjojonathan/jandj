@@ -3,40 +3,49 @@
 @import 'tw-animate-css';
 
 :root {
-  --background: 42 38% 92%;
-  --foreground: 150 20% 16%;
-  --border: 38 20% 77%;
-  --card: 42 35% 89%;
-  --card-foreground: 150 20% 16%;
-  --card-border: 38 20% 77%;
-  --sidebar: 42 35% 89%;
-  --sidebar-foreground: 150 20% 16%;
-  --sidebar-border: 38 20% 77%;
-  --sidebar-primary: 148 38% 19%;
-  --sidebar-primary-foreground: 42 38% 92%;
-  --sidebar-accent: 40 24% 83%;
-  --sidebar-accent-foreground: 150 20% 16%;
-  --sidebar-ring: 148 38% 19%;
-  --popover: 42 35% 89%;
-  --popover-foreground: 150 20% 16%;
-  --popover-border: 38 20% 77%;
-  --primary: 148 38% 19%;
-  --primary-foreground: 42 38% 92%;
-  --secondary: 37 23% 81%;
-  --secondary-foreground: 150 20% 16%;
-  --muted: 39 22% 84%;
-  --muted-foreground: 28 13% 36%;
-  --accent: 18 42% 39%;
-  --accent-foreground: 42 38% 92%;
+  --background: 42 31% 94%;
+  --foreground: 20 5% 15%;
+  --border: 12 10% 33%;
+  --card: 38 24% 89%;
+  --card-foreground: 20 5% 15%;
+  --card-border: 12 10% 33%;
+  --sidebar: 38 24% 89%;
+  --sidebar-foreground: 20 5% 15%;
+  --sidebar-border: 12 10% 33%;
+  --sidebar-primary: 3 24% 29%;
+  --sidebar-primary-foreground: 42 31% 94%;
+  --sidebar-accent: 35 22% 86%;
+  --sidebar-accent-foreground: 20 5% 15%;
+  --sidebar-ring: 3 24% 29%;
+  --popover: 38 24% 89%;
+  --popover-foreground: 20 5% 15%;
+  --popover-border: 12 10% 33%;
+  --primary: 3 24% 29%;
+  --primary-foreground: 42 31% 94%;
+  --secondary: 35 22% 86%;
+  --secondary-foreground: 20 5% 15%;
+  --muted: 35 18% 85%;
+  --muted-foreground: 18 5% 36%;
+  --accent: 3 24% 29%;
+  --accent-foreground: 42 31% 94%;
   --destructive: 3 57% 43%;
   --destructive-foreground: 0 0% 100%;
-  --input: 38 20% 68%;
-  --ring: 148 38% 19%;
-  --chart-1: 148 38% 19%;
-  --chart-2: 18 42% 39%;
-  --chart-3: 40 30% 54%;
-  --chart-4: 195 18% 36%;
-  --chart-5: 24 25% 34%;
+  --input: 12 10% 45%;
+  --ring: 3 24% 29%;
+  --chart-1: 3 24% 29%;
+  --chart-2: 18 24% 42%;
+  --chart-3: 35 24% 54%;
+  --chart-4: 20 5% 36%;
+  --chart-5: 24 18% 34%;
+  --hostel-wall: #F4F1EA;
+  --hostel-surface: #EAE5DC;
+  --hostel-inset: #E2DBD1;
+  --hostel-input: #FAF8F3;
+  --hostel-maroon: #5C3A38;
+  --hostel-maroon-deep: #452A28;
+  --hostel-charcoal: #292625;
+  --hostel-border: #514744;
+  --hostel-muted: #625A57;
   --app-font-sans: 'DM Sans', sans-serif;
   --app-font-serif: 'Fraunces', Georgia, serif;
   --app-font-mono: 'DM Sans', sans-serif;
@@ -113,3 +122,52 @@
 }
 
 .serif { font-family: var(--app-font-serif); }
+
+/* Edit this palette to change the hostel site's core colors. */
+[class*="bg-[#"] {
+  background-color: var(--hostel-surface) !important;
+}
+[class*="bg-[#eee9dd]"] {
+  background-color: var(--hostel-wall) !important;
+}
+[class*="bg-[#f0eadc]"] {
+  background-color: var(--hostel-input) !important;
+}
+[class*="bg-[#e6e0d3]"],
+[class*="bg-[#e4dfd2]"],
+[class*="bg-[#ded8ca]"] {
+  background-color: var(--hostel-inset) !important;
+}
+[class*="bg-[#e7eadc]"] {
+  background-color: #EEE7E3 !important;
+}
+[class*="bg-[#1e432f]"],
+[class*="bg-[#234633]"] {
+  background-color: var(--hostel-maroon) !important;
+}
+[class*="text-[#"] {
+  color: var(--hostel-charcoal) !important;
+}
+[class*="text-[#20392b]"],
+[class*="text-[#1d3529]"],
+[class*="text-[#234633]"],
+[class*="text-[#263a2d]"],
+[class*="text-[#2c4637]"],
+[class*="text-[#344638]"],
+[class*="text-[#925039]"],
+[class*="text-[#8c553f]"],
+[class*="text-[#775344]"] {
+  color: var(--hostel-maroon) !important;
+}
+[class*="text-[#f0eadc]"],
+[class*="text-[#e2e4d7]"],
+[class*="text-[#d8b28f]"] {
+  color: var(--hostel-wall) !important;
+}
+[class*="border-[#"],
+[class*="divide-[#"] {
+  border-color: var(--hostel-border) !important;
+}
+[class*="border-[#f0eadc]"] {
+  border-color: var(--hostel-wall) !important;
+}

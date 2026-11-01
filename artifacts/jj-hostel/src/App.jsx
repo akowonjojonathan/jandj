@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import bedroomPhoto from '@assets/generated_images/jj-hostel-placeholder-bedroom.jpg';
 import commonRoomPhoto from '@assets/generated_images/jj-hostel-placeholder-common-room.jpg';
 import exteriorPhoto from '@assets/generated_images/jj-hostel-placeholder-exterior.jpg';
@@ -6,68 +6,52 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Link, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-
-type ReportStatus = 'New' | 'In progress' | 'Resolved';
-type Complaint = {
-  id: string;
-  room: string;
-  category: string;
-  description: string;
-  date: string;
-  status: ReportStatus;
-};
-type Notice = { id: string; tag: string; title: string; body: string; date: string };
-type Room = { number: number; status: 'Available' | 'Occupied' };
-
 const STORAGE_KEY = 'jj-hostel-demo-complaints';
 const NOTICES_KEY = 'jj-hostel-demo-notices';
 const ROOMS_KEY = 'jj-hostel-demo-rooms';
 const SESSION_KEY = 'jj-hostel-manager-session';
-const issueCategories = ['Plumbing', 'Electrical', 'Carpentry', 'General'] as const;
+const issueCategories = ['Plumbing', 'Electrical', 'Carpentry', 'General'];
 const roomNames = Array.from({ length: 67 }, (_, index) => `Room ${index + 1}`);
-const sampleReports: Complaint[] = [
+const sampleReports = [
   { id: 'sample-report-1', room: 'Room 4', category: 'Plumbing', description: 'The shower tap keeps dripping after it is turned off.', date: 'Demo sample', status: 'New' },
   { id: 'sample-report-2', room: 'Room 19', category: 'Electrical', description: 'The reading light beside the desk is not working.', date: 'Demo sample', status: 'In progress' },
   { id: 'sample-report-3', room: 'Room 42', category: 'Carpentry', description: 'The wardrobe door hinge has come loose.', date: 'Demo sample', status: 'New' },
 ];
-const initialNotices: Notice[] = [
+const initialNotices = [
   { id: 'notice-water', tag: 'WATER', title: 'Water maintenance on Friday', body: 'Water service may be interrupted from 8:00 am while the storage tanks are serviced. Please store enough water beforehand; normal supply is expected by midday.', date: 'MANAGER NOTICE' },
   { id: 'notice-checkout', tag: 'CHECKOUT', title: 'End-of-semester checkout rules', body: 'Please return your room key to the manager, clear personal belongings, and leave the room tidy before checkout. Confirm your departure time in advance.', date: 'END OF SEMESTER' },
   { id: 'notice-quiet', tag: 'COMMUNITY', title: 'Quiet hours begin at 10:00 pm', body: 'Please keep noise low in shared spaces during study hours and overnight so everyone can rest and focus.', date: 'HOUSE REMINDER' },
 ];
-const initialRooms: Room[] = Array.from({ length: 67 }, (_, index) => ({
+const initialRooms = Array.from({ length: 67 }, (_, index) => ({
   number: index + 1,
   status: [1, 4, 7, 12, 18, 22, 29, 34, 41, 48, 55, 62].includes(index + 1) ? 'Available' : 'Occupied',
 }));
 
-function readStorage<T>(key: string, fallback: T): T {
+function readStorage(key, fallback) {
   try {
     const value = localStorage.getItem(key);
-    if (value) return JSON.parse(value) as T;
+    if (value) return JSON.parse(value);
   } catch {
     // Keep the demo usable in a browser where storage is unavailable.
   }
   return fallback;
 }
-function writeStorage<T>(key: string, value: T) {
+function writeStorage(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // State remains available until this tab is closed.
   }
 }
-function readReports(): Complaint[] {
+function readReports() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw === null) return sampleReports;
-    const stored: unknown = JSON.parse(raw);
+    const stored = JSON.parse(raw);
     if (!Array.isArray(stored)) return sampleReports;
     return stored.flatMap((item) => {
       if (!item || typeof item !== 'object') return [];
-      const report = item as Partial<Complaint>;
+      const report = item;
       if (!roomNames.includes(String(report.room)) || !report.description || !report.category) return [];
       return [{
         id: report.id || `report-${Date.now()}-${Math.random()}`,
@@ -84,10 +68,9 @@ function readReports(): Complaint[] {
 }
 const complaintSchema = z.object({
   room: z.string().refine((value) => roomNames.includes(value), 'Choose a room from the list.'),
-  category: z.string().refine((value) => issueCategories.includes(value as (typeof issueCategories)[number]), 'Choose a listed category.'),
+  category: z.string().refine((value) => issueCategories.includes(value), 'Choose a listed category.'),
   description: z.string().trim().min(1, 'Describe the issue.'),
 });
-type ComplaintFormValues = z.infer<typeof complaintSchema>;
 
 const publicNavItems = [
   { href: '/', label: 'Home' },
@@ -102,11 +85,11 @@ const managerNavItems = [
   { href: '#manager-rooms', label: 'Room availability' },
 ];
 
-function AppShell({ children, managerMode, onSignOut }: { children: ReactNode; managerMode: boolean; onSignOut: () => void }) {
+function AppShell({ children, managerMode, onSignOut }) {
   const [location] = useLocation();
   const [mobileMenu, setMobileMenu] = useState(false);
   useEffect(() => setMobileMenu(false), [location]);
-  function renderNavItems(mobile: boolean) {
+  function renderNavItems(mobile) {
     const linkClass = mobile
       ? 'block border-b border-[#d5cebf] px-2 py-3 text-sm font-semibold text-[#625e54]'
       : 'border-b-2 border-transparent px-3 py-3 text-[12px] font-semibold text-[#625e54]';
@@ -163,7 +146,7 @@ function AppShell({ children, managerMode, onSignOut }: { children: ReactNode; m
   </div>;
 }
 
-function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
+function SectionHeading({ eyebrow, title, description }) {
   return <div className="mb-8 max-w-[650px]">
     <p className="mb-3 text-[10px] font-bold uppercase tracking-[.2em] text-[#925039]">{eyebrow}</p>
     <h1 className="serif text-[38px] font-semibold leading-[1.08] tracking-[-.04em] text-[#20392b] sm:text-[48px]">{title}</h1>
@@ -171,7 +154,7 @@ function SectionHeading({ eyebrow, title, description }: { eyebrow: string; titl
   </div>;
 }
 
-function HomePage({ notices }: { notices: Notice[] }) {
+function HomePage({ notices }) {
   const gallery = [
     { src: bedroomPhoto, alt: 'Sample hostel bedroom with two beds, a desk and green-trimmed windows.', title: 'A room to settle into', label: 'Bedroom' },
     { src: commonRoomPhoto, alt: 'Sample shared study room with large tables, bookshelves and open windows.', title: 'Room to study together', label: 'Shared study room' },
@@ -234,7 +217,7 @@ function HomePage({ notices }: { notices: Notice[] }) {
   </div>;
 }
 
-function RoomsPage({ rooms }: { rooms: Room[] }) {
+function RoomsPage({ rooms }) {
   return <div className="mx-auto max-w-[1240px] px-5 pt-12 md:px-9 md:pt-[68px]">
     <SectionHeading eyebrow="YOUR NEXT ROOM" title="Room availability" description="A clear look at Rooms 1 through 67. Availability can change, so please confirm before making plans." />
     <div className="mb-5 flex flex-wrap items-center gap-4 border-y border-[#c9c1b1] bg-[#e6e0d3] px-5 py-4">
@@ -255,9 +238,9 @@ function RoomsPage({ rooms }: { rooms: Room[] }) {
   </div>;
 }
 
-function ReportPage({ onAdd, onToast }: { onAdd: (complaint: Complaint) => void; onToast: (message: string) => void }) {
-  const form = useForm<ComplaintFormValues>({ resolver: zodResolver(complaintSchema), defaultValues: { room: '', category: '', description: '' } });
-  function submitReport(values: ComplaintFormValues) {
+function ReportPage({ onAdd, onToast }) {
+  const form = useForm({ resolver: zodResolver(complaintSchema), defaultValues: { room: '', category: '', description: '' } });
+  function submitReport(values) {
     onAdd({ id: `report-${Date.now()}`, room: values.room, category: values.category, description: values.description.trim(), date: new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date()), status: 'New' });
     onToast('Your report has been saved in this browser demo.');
     form.reset();
@@ -267,27 +250,37 @@ function ReportPage({ onAdd, onToast }: { onAdd: (complaint: Complaint) => void;
       <div><SectionHeading eyebrow="WE’RE LISTENING" title="Let us know what needs fixing." description="A leaking tap, a faulty light, or something else around the hostel? Send a report for the manager to review." />
         <div className="mt-10 hidden border-y border-[#c9c1b1] bg-[#e6e0d3] p-5 sm:block"><p className="text-sm font-bold text-[#344638]">Your report stays in this browser demo</p><p className="mt-1 text-xs leading-5 text-[#666459]">Include enough detail to help the manager understand the issue and where to find it.</p></div>
       </div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(submitReport)} className="border border-[#c9c1b1] bg-[#e8e2d5] p-6 sm:p-9" data-testid="form-complaint">
-          <div className="mb-7 border-b border-[#c9c1b1] pb-5"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#925039]">MAINTENANCE REPORT</p><h2 className="serif mt-2 text-[25px] font-semibold tracking-[-.035em] text-[#263a2d]">What’s the issue?</h2></div>
-          <div className="space-y-5">
-            <FormField control={form.control} name="room" render={({ field }) => <FormItem><FormLabel className="text-[12px] font-bold text-[#454b41]">Room Number <span className="text-[#925039]">*</span></FormLabel><FormControl><select {...field} data-testid="input-room-number" className="w-full border border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm text-[#263a2d] outline-none focus:border-[#53745b] focus:ring-2 focus:ring-[#53745b]/15"><option value="">Select a room</option>{roomNames.map((room) => <option key={room} value={room}>{room}</option>)}</select></FormControl><FormMessage className="text-xs" /></FormItem>} />
-            <FormField control={form.control} name="category" render={({ field }) => <FormItem><FormLabel className="text-[12px] font-bold text-[#454b41]">Issue Category <span className="text-[#925039]">*</span></FormLabel><FormControl><select {...field} data-testid="select-issue-category" className="w-full border border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm text-[#263a2d] outline-none focus:border-[#53745b] focus:ring-2 focus:ring-[#53745b]/15"><option value="">Select a category</option>{issueCategories.map((category) => <option key={category} value={category}>{category}</option>)}</select></FormControl><FormMessage className="text-xs" /></FormItem>} />
-            <FormField control={form.control} name="description" render={({ field }) => <FormItem><FormLabel className="text-[12px] font-bold text-[#454b41]">Complaint Description <span className="text-[#925039]">*</span></FormLabel><FormControl><Textarea {...field} rows={5} placeholder="Please describe what’s happening and where..." data-testid="input-complaint-description" className="min-h-0 resize-y rounded-none border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm leading-6 text-[#263a2d] placeholder:text-[#797568] focus-visible:ring-[#53745b]/20" /></FormControl><FormMessage className="text-xs" /></FormItem>} />
+      <form onSubmit={form.handleSubmit(submitReport)} className="border border-[#c9c1b1] bg-[#e8e2d5] p-6 sm:p-9" data-testid="form-complaint">
+        <div className="mb-7 border-b border-[#c9c1b1] pb-5"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#925039]">MAINTENANCE REPORT</p><h2 className="serif mt-2 text-[25px] font-semibold tracking-[-.035em] text-[#263a2d]">What’s the issue?</h2></div>
+        <div className="space-y-5">
+          <div>
+            <label htmlFor="report-room" className="mb-1.5 block text-[12px] font-bold text-[#454b41]">Room Number <span className="text-[#925039]">*</span></label>
+            <select id="report-room" {...form.register('room')} data-testid="input-room-number" className="w-full border border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm text-[#263a2d] outline-none focus:border-[#53745b] focus:ring-2 focus:ring-[#53745b]/15"><option value="">Select a room</option>{roomNames.map((room) => <option key={room} value={room}>{room}</option>)}</select>
+            {form.formState.errors.room && <p className="mt-1 text-xs text-[#8b392c]">{form.formState.errors.room.message}</p>}
           </div>
-          <button type="submit" data-testid="button-submit-complaint" className="mt-7 flex w-full items-center justify-center border border-[#234633] bg-[#234633] px-5 py-3.5 text-sm font-bold text-[#f0eadc] focus:outline-none focus:ring-2 focus:ring-[#53745b] focus:ring-offset-2">Send report</button>
-          <p className="mt-4 text-center text-[11px] text-[#6c695f]">Please don’t include sensitive personal information.</p>
-        </form>
-      </Form>
+          <div>
+            <label htmlFor="report-category" className="mb-1.5 block text-[12px] font-bold text-[#454b41]">Issue Category <span className="text-[#925039]">*</span></label>
+            <select id="report-category" {...form.register('category')} data-testid="select-issue-category" className="w-full border border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm text-[#263a2d] outline-none focus:border-[#53745b] focus:ring-2 focus:ring-[#53745b]/15"><option value="">Select a category</option>{issueCategories.map((category) => <option key={category} value={category}>{category}</option>)}</select>
+            {form.formState.errors.category && <p className="mt-1 text-xs text-[#8b392c]">{form.formState.errors.category.message}</p>}
+          </div>
+          <div>
+            <label htmlFor="report-description" className="mb-1.5 block text-[12px] font-bold text-[#454b41]">Complaint Description <span className="text-[#925039]">*</span></label>
+            <textarea id="report-description" {...form.register('description')} rows={5} placeholder="Please describe what’s happening and where..." data-testid="input-complaint-description" className="min-h-0 w-full resize-y rounded-none border border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm leading-6 text-[#263a2d] placeholder:text-[#797568] focus-visible:ring-[#53745b]/20" />
+            {form.formState.errors.description && <p className="mt-1 text-xs text-[#8b392c]">{form.formState.errors.description.message}</p>}
+          </div>
+        </div>
+        <button type="submit" data-testid="button-submit-complaint" className="mt-7 flex w-full items-center justify-center border border-[#234633] bg-[#234633] px-5 py-3.5 text-sm font-bold text-[#f0eadc] focus:outline-none focus:ring-2 focus:ring-[#53745b] focus:ring-offset-2">Send report</button>
+        <p className="mt-4 text-center text-[11px] text-[#6c695f]">Please don’t include sensitive personal information.</p>
+      </form>
     </div>
   </div>;
 }
 
-function ManagerLogin({ onLogin }: { onLogin: () => void }) {
+function ManagerLogin({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  function submit(event) {
     event.preventDefault();
     if (username === 'admin' && password === 'admin@123') {
       onLogin();
@@ -302,9 +295,9 @@ function ManagerLogin({ onLogin }: { onLogin: () => void }) {
       <form onSubmit={submit} className="border border-[#c9c1b1] bg-[#e8e2d5] p-6 sm:p-9" data-testid="form-manager-login">
         <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#925039]">MANAGER SIGN IN</p><h2 className="serif mt-2 border-b border-[#c9c1b1] pb-5 text-[25px] font-semibold text-[#263a2d]">Continue to the dashboard</h2>
         <label className="mt-6 block text-[12px] font-bold text-[#454b41]" htmlFor="manager-username">Username</label>
-        <Input id="manager-username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} data-testid="input-manager-username" className="mt-2 h-auto rounded-none border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm" required />
+        <input id="manager-username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} data-testid="input-manager-username" className="mt-2 h-auto w-full rounded-none border border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm" required />
         <label className="mt-5 block text-[12px] font-bold text-[#454b41]" htmlFor="manager-password">Password</label>
-        <Input id="manager-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} data-testid="input-manager-password" className="mt-2 h-auto rounded-none border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm" required />
+        <input id="manager-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} data-testid="input-manager-password" className="mt-2 h-auto w-full rounded-none border border-[#bdb5a5] bg-[#f0eadc] px-4 py-3 text-sm" required />
         {error && <p className="mt-4 text-sm text-[#8b392c]" role="alert" data-testid="text-login-error">{error}</p>}
         <button type="submit" data-testid="button-manager-login" className="mt-7 w-full border border-[#234633] bg-[#234633] px-5 py-3.5 text-sm font-bold text-[#f0eadc] focus:outline-none focus:ring-2 focus:ring-[#53745b] focus:ring-offset-2">Sign in</button>
         <p className="mt-4 text-xs leading-5 text-[#666459]">Demo credentials: username <strong>admin</strong>, password <strong>admin@123</strong>.</p>
@@ -313,14 +306,10 @@ function ManagerLogin({ onLogin }: { onLogin: () => void }) {
   </div>;
 }
 
-function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNotice, rooms, onToggleRoom }: {
-  complaints: Complaint[]; onStatus: (id: string, status: ReportStatus) => void;
-  notices: Notice[]; onSaveNotice: (notice: Notice) => void; onDeleteNotice: (id: string) => void;
-  rooms: Room[]; onToggleRoom: (number: number) => void;
-}) {
+function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNotice, rooms, onToggleRoom }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState(null);
   const [tag, setTag] = useState('');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -332,8 +321,8 @@ function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNoti
     return matchesTerm && (statusFilter === 'All' || report.status === statusFilter);
   }), [complaints, search, statusFilter]);
   function resetNoticeForm() { setEditingId(null); setTag(''); setTitle(''); setBody(''); }
-  function editNotice(notice: Notice) { setEditingId(notice.id); setTag(notice.tag); setTitle(notice.title); setBody(notice.body); }
-  function submitNotice(event: React.FormEvent<HTMLFormElement>) {
+  function editNotice(notice) { setEditingId(notice.id); setTag(notice.tag); setTitle(notice.title); setBody(notice.body); }
+  function submitNotice(event) {
     event.preventDefault();
     onSaveNotice({ id: editingId || `notice-${Date.now()}`, tag: tag.trim().toUpperCase(), title: title.trim(), body: body.trim(), date: new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date()) });
     resetNoticeForm();
@@ -350,7 +339,7 @@ function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNoti
     <section id="manager-reports" className="mb-10 border border-[#c9c1b1] bg-[#e8e2d5]" aria-labelledby="reports-heading">
       <div className="border-b border-[#c9c1b1] px-5 py-5 sm:px-7"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 id="reports-heading" className="serif text-[22px] font-semibold text-[#263a2d]">Visitor reports</h2><p className="mt-1 text-xs text-[#68655a]">Review each issue and update its progress.</p></div><span className="border border-[#bdb5a5] px-3 py-1.5 text-[10px] font-bold text-[#53594e]" data-testid="status-report-count">{complaints.length} reports</span></div>
         <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_190px]">
-          <label className="sr-only" htmlFor="report-search">Search reports</label><Input id="report-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search room, category, or description" data-testid="input-report-search" className="h-auto rounded-none border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm" />
+          <label className="sr-only" htmlFor="report-search">Search reports</label><input id="report-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search room, category, or description" data-testid="input-report-search" className="h-auto w-full rounded-none border border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm" />
           <label className="sr-only" htmlFor="report-status-filter">Filter reports by status</label><select id="report-status-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} data-testid="select-report-filter" className="border border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm text-[#263a2d]"><option>All</option><option>New</option><option>In progress</option><option>Resolved</option></select>
         </div>
       </div>
@@ -361,7 +350,7 @@ function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNoti
             <td className="whitespace-nowrap px-5 py-5 text-sm font-bold text-[#3a453a] sm:px-7"><span data-testid={`text-complaint-room-${report.id}`}>{report.room}</span><p className="mt-1 text-[11px] font-normal text-[#716e63]">{report.date}</p></td>
             <td className="px-5 py-5"><span className="inline-flex border border-[#c4bdaf] px-2.5 py-1 text-[10px] font-semibold text-[#50594c]" data-testid={`text-complaint-category-${report.id}`}>{report.category}</span></td>
             <td className="max-w-[430px] px-5 py-5 text-[13px] leading-5 text-[#56584f]" data-testid={`text-complaint-description-${report.id}`}>{report.description}</td>
-            <td className="px-5 py-5"><label className="sr-only" htmlFor={`progress-${report.id}`}>Progress for {report.room}</label><select id={`progress-${report.id}`} value={report.status} onChange={(event) => onStatus(report.id, event.target.value as ReportStatus)} data-testid={`select-report-progress-${report.id}`} className="min-w-[125px] border border-[#bdb5a5] bg-[#f0eadc] px-3 py-2 text-xs font-semibold text-[#263a2d]"><option>New</option><option>In progress</option><option>Resolved</option></select></td>
+            <td className="px-5 py-5"><label className="sr-only" htmlFor={`progress-${report.id}`}>Progress for {report.room}</label><select id={`progress-${report.id}`} value={report.status} onChange={(event) => onStatus(report.id, event.target.value)} data-testid={`select-report-progress-${report.id}`} className="min-w-[125px] border border-[#bdb5a5] bg-[#f0eadc] px-3 py-2 text-xs font-semibold text-[#263a2d]"><option>New</option><option>In progress</option><option>Resolved</option></select></td>
           </tr>)}</tbody>
         </table>
       </div> : <div className="px-6 py-12 text-center" data-testid="empty-reports"><p className="text-sm font-bold text-[#4c5147]">{complaints.length ? 'No matching reports' : 'All quiet for now'}</p><p className="mt-1 text-xs text-[#666459]">{complaints.length ? 'Try a different search or status filter.' : 'Visitor reports will appear here when submitted.'}</p></div>}
@@ -371,9 +360,9 @@ function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNoti
         <h2 id="notices-heading" className="serif text-[22px] font-semibold text-[#263a2d]">{editingId ? 'Edit announcement' : 'Add an announcement'}</h2>
         <p className="mt-1 text-xs text-[#68655a]">Published announcements appear on the public home page.</p>
         <form onSubmit={submitNotice} className="mt-5 space-y-4" data-testid="form-notice">
-          <div><label className="mb-1.5 block text-xs font-bold text-[#454b41]" htmlFor="notice-tag">Label</label><Input id="notice-tag" value={tag} onChange={(event) => setTag(event.target.value)} maxLength={24} required data-testid="input-notice-tag" className="h-auto rounded-none border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm" /></div>
-          <div><label className="mb-1.5 block text-xs font-bold text-[#454b41]" htmlFor="notice-title">Announcement title</label><Input id="notice-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={90} required data-testid="input-notice-title" className="h-auto rounded-none border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm" /></div>
-          <div><label className="mb-1.5 block text-xs font-bold text-[#454b41]" htmlFor="notice-body">Announcement details</label><Textarea id="notice-body" value={body} onChange={(event) => setBody(event.target.value)} rows={4} maxLength={500} required data-testid="input-notice-body" className="resize-y rounded-none border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm" /></div>
+          <div><label className="mb-1.5 block text-xs font-bold text-[#454b41]" htmlFor="notice-tag">Label</label><input id="notice-tag" value={tag} onChange={(event) => setTag(event.target.value)} maxLength={24} required data-testid="input-notice-tag" className="h-auto w-full rounded-none border border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm" /></div>
+          <div><label className="mb-1.5 block text-xs font-bold text-[#454b41]" htmlFor="notice-title">Announcement title</label><input id="notice-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={90} required data-testid="input-notice-title" className="h-auto w-full rounded-none border border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm" /></div>
+          <div><label className="mb-1.5 block text-xs font-bold text-[#454b41]" htmlFor="notice-body">Announcement details</label><textarea id="notice-body" value={body} onChange={(event) => setBody(event.target.value)} rows={4} maxLength={500} required data-testid="input-notice-body" className="w-full resize-y rounded-none border border-[#bdb5a5] bg-[#f0eadc] px-3 py-2.5 text-sm" /></div>
           <div className="flex flex-wrap gap-2"><button type="submit" data-testid="button-save-notice" className="border border-[#234633] bg-[#234633] px-4 py-2.5 text-xs font-bold text-[#f0eadc]">{editingId ? 'Save changes' : 'Publish announcement'}</button>{editingId && <button type="button" onClick={resetNoticeForm} data-testid="button-cancel-notice-edit" className="border border-[#8e9a8b] px-4 py-2.5 text-xs font-bold text-[#344638]">Cancel edit</button>}</div>
         </form>
       </div>
@@ -397,10 +386,10 @@ function NotFoundPage() {
 
 function Router() {
   const [location, setLocation] = useLocation();
-  const [complaints, setComplaints] = useState<Complaint[]>(readReports);
-  const [notices, setNotices] = useState<Notice[]>(() => readStorage(NOTICES_KEY, initialNotices));
-  const [rooms, setRooms] = useState<Room[]>(() => {
-    const saved = readStorage<Room[]>(ROOMS_KEY, initialRooms);
+  const [complaints, setComplaints] = useState(readReports);
+  const [notices, setNotices] = useState(() => readStorage(NOTICES_KEY, initialNotices));
+  const [rooms, setRooms] = useState(() => {
+    const saved = readStorage(ROOMS_KEY, initialRooms);
     return Array.from({ length: 67 }, (_, index) => {
       const room = saved.find((item) => item.number === index + 1);
       return { number: index + 1, status: room?.status === 'Available' ? 'Available' : 'Occupied' };
@@ -423,11 +412,11 @@ function Router() {
     const timer = window.setTimeout(() => setToastMessage(''), 4200);
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
-  function addComplaint(complaint: Complaint) { setComplaints((existing) => [complaint, ...existing]); }
-  function updateReportStatus(id: string, status: ReportStatus) { setComplaints((existing) => existing.map((report) => report.id === id ? { ...report, status } : report)); }
-  function saveNotice(notice: Notice) { setNotices((existing) => existing.some((item) => item.id === notice.id) ? existing.map((item) => item.id === notice.id ? notice : item) : [notice, ...existing]); }
-  function deleteNotice(id: string) { setNotices((existing) => existing.filter((notice) => notice.id !== id)); }
-  function toggleRoom(number: number) { setRooms((existing) => existing.map((room) => room.number === number ? { ...room, status: room.status === 'Available' ? 'Occupied' : 'Available' } : room)); }
+  function addComplaint(complaint) { setComplaints((existing) => [complaint, ...existing]); }
+  function updateReportStatus(id, status) { setComplaints((existing) => existing.map((report) => report.id === id ? { ...report, status } : report)); }
+  function saveNotice(notice) { setNotices((existing) => existing.some((item) => item.id === notice.id) ? existing.map((item) => item.id === notice.id ? notice : item) : [notice, ...existing]); }
+  function deleteNotice(id) { setNotices((existing) => existing.filter((notice) => notice.id !== id)); }
+  function toggleRoom(number) { setRooms((existing) => existing.map((room) => room.number === number ? { ...room, status: room.status === 'Available' ? 'Occupied' : 'Available' } : room)); }
   function login() {
     try { sessionStorage.setItem(SESSION_KEY, 'signed-in'); } catch { /* Access remains limited to the current app session. */ }
     setManagerAuthenticated(true);
