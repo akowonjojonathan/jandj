@@ -10,6 +10,10 @@ const STORAGE_KEY = 'jj-hostel-demo-complaints';
 const NOTICES_KEY = 'jj-hostel-demo-notices';
 const ROOMS_KEY = 'jj-hostel-demo-rooms';
 const SESSION_KEY = 'jj-hostel-manager-session';
+const THEME_KEY = 'jj-hostel-demo-theme';
+// Replace these demo contact details with the hostel's confirmed information.
+const HOSTEL_PHONE = '+233 XX XXX XXXX';
+const HOSTEL_EMAIL = 'manager@example.com';
 const issueCategories = ['Plumbing', 'Electrical', 'Carpentry', 'General'];
 const roomNames = Array.from({ length: 67 }, (_, index) => `Room ${index + 1}`);
 const sampleReports = [
@@ -88,7 +92,15 @@ const managerNavItems = [
 function AppShell({ children, managerMode, onSignOut }) {
   const [location] = useLocation();
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    try { return localStorage.getItem(THEME_KEY) === 'dark'; } catch { return false; }
+  });
   useEffect(() => setMobileMenu(false), [location]);
+  useEffect(() => {
+    try { localStorage.setItem(THEME_KEY, darkMode ? 'dark' : 'light'); } catch { /* The selected theme remains active for this visit. */ }
+  }, [darkMode]);
+  const phoneIsPlaceholder = HOSTEL_PHONE.includes('X');
+  const emailIsPlaceholder = HOSTEL_EMAIL.endsWith('@example.com');
   function renderNavItems(mobile) {
     const linkClass = mobile
       ? 'block border-b border-[#d5cebf] px-2 py-3 text-sm font-semibold text-[#625e54]'
@@ -113,7 +125,7 @@ function AppShell({ children, managerMode, onSignOut }) {
       {label}
     </Link>);
   }
-  return <div className="min-h-[100dvh] bg-[#eee9dd] text-[#1d3529]">
+  return <div className={`${darkMode ? 'dark' : ''} min-h-[100dvh] bg-[#eee9dd] text-[#1d3529]`} style={{ colorScheme: darkMode ? 'dark' : 'light' }}>
     <header className="sticky top-0 z-40 border-b border-[#c9c1b1] bg-[#eee9dd]">
       <div className="mx-auto flex min-h-[76px] max-w-[1240px] items-center justify-between px-5 md:px-9">
         <Link href="/" className="flex items-center gap-3" data-testid="link-home-brand">
@@ -123,14 +135,22 @@ function AppShell({ children, managerMode, onSignOut }) {
             <span className="mt-1 block text-[9px] font-bold uppercase tracking-[.19em] text-[#775344]">A good place to grow</span>
           </span>
         </Link>
-        <nav className="hidden items-center gap-1 md:flex" aria-label={managerMode ? 'Manager navigation' : 'Main navigation'}>
-          {renderNavItems(false)}
-        </nav>
-        <button type="button" onClick={() => setMobileMenu(!mobileMenu)} aria-expanded={mobileMenu}
-          aria-label={mobileMenu ? 'Close navigation menu' : 'Open navigation menu'} data-testid="button-mobile-menu"
-          className="flex h-10 items-center border border-[#8e9a8b] px-3 text-[11px] font-bold uppercase tracking-wider text-[#234633] md:hidden">
-          {mobileMenu ? 'Close' : 'Menu'}
-        </button>
+        <div className="flex items-center gap-2">
+          <nav className="hidden items-center gap-1 md:flex" aria-label={managerMode ? 'Manager navigation' : 'Main navigation'}>
+            {renderNavItems(false)}
+          </nav>
+          <button type="button" onClick={() => setDarkMode((current) => !current)} aria-pressed={darkMode}
+            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'} data-testid="button-theme-toggle"
+            className="flex h-10 items-center border border-[#8e9a8b] px-2.5 text-[10px] font-bold uppercase tracking-wide text-[#234633] focus:outline-none focus:ring-2 focus:ring-[#53745b] sm:px-3">
+            <span className="sm:hidden">{darkMode ? 'Light' : 'Dark'}</span>
+            <span className="hidden sm:inline">{darkMode ? 'Light mode' : 'Dark mode'}</span>
+          </button>
+          <button type="button" onClick={() => setMobileMenu(!mobileMenu)} aria-expanded={mobileMenu}
+            aria-label={mobileMenu ? 'Close navigation menu' : 'Open navigation menu'} data-testid="button-mobile-menu"
+            className="flex h-10 items-center border border-[#8e9a8b] px-3 text-[11px] font-bold uppercase tracking-wider text-[#234633] md:hidden">
+            {mobileMenu ? 'Close' : 'Menu'}
+          </button>
+        </div>
       </div>
       {mobileMenu && <nav className="border-t border-[#c9c1b1] bg-[#e8e2d5] px-5 py-3 md:hidden" aria-label={managerMode ? 'Manager navigation' : 'Mobile navigation'}>
         {renderNavItems(true)}
@@ -138,9 +158,25 @@ function AppShell({ children, managerMode, onSignOut }) {
     </header>
     <main>{children}</main>
     <footer className="mt-20 border-t border-[#c9c1b1] bg-[#e6e0d3]">
-      <div className="mx-auto flex max-w-[1240px] flex-col gap-3 px-5 py-8 text-xs text-[#5d6257] sm:flex-row sm:items-center sm:justify-between md:px-9">
-        <span className="font-semibold tracking-wide text-[#344638]">J &amp; J Hostel <span className="font-normal text-[#775d4c]">· Accra, Ghana</span></span>
-        <span>A comfortable place to study and settle in.</span>
+      <div className="mx-auto grid max-w-[1240px] gap-6 px-5 py-8 text-xs text-[#5d6257] sm:grid-cols-2 md:grid-cols-[1fr_1fr_auto] md:px-9">
+        <div>
+          <p className="font-semibold tracking-wide text-[#344638]">J &amp; J Hostel <span className="font-normal text-[#775d4c]">· Accra, Ghana</span></p>
+          <p className="mt-2">A comfortable place to study and settle in.</p>
+        </div>
+        <div>
+          <p className="font-bold uppercase tracking-[.14em] text-[#925039]">Contact the hostel</p>
+          <p className="mt-2">Phone: {phoneIsPlaceholder
+            ? <span data-testid="text-placeholder-phone">{HOSTEL_PHONE}</span>
+            : <a href={`tel:${HOSTEL_PHONE.replace(/[^\d+]/g, '')}`} data-testid="link-hostel-phone">{HOSTEL_PHONE}</a>}</p>
+          <p className="mt-1">Email: {emailIsPlaceholder
+            ? <span data-testid="text-placeholder-email">{HOSTEL_EMAIL}</span>
+            : <a href={`mailto:${HOSTEL_EMAIL}`} data-testid="link-hostel-email">{HOSTEL_EMAIL}</a>}</p>
+          {(phoneIsPlaceholder || emailIsPlaceholder) && <p className="mt-2 text-[10px]">Demo details. Replace with the hostel’s confirmed contact information.</p>}
+        </div>
+        <div className="flex flex-col gap-2 md:items-end">
+          <Link href="/terms" data-testid="link-terms" className="w-fit border-b border-[#8e9a8b] pb-1 font-semibold text-[#344638]">Terms &amp; Conditions</Link>
+          <span className="text-[10px]">For the J &amp; J Hostel website demo</span>
+        </div>
       </div>
     </footer>
   </div>;
@@ -380,6 +416,31 @@ function ManagerPage({ complaints, onStatus, notices, onSaveNotice, onDeleteNoti
   </div>;
 }
 
+function TermsPage() {
+  return <div className="mx-auto max-w-[1240px] px-5 py-12 md:px-9 md:py-[68px]">
+    <SectionHeading eyebrow="SITE INFORMATION" title="Terms & Conditions" description="Please read these terms before using the J & J Hostel website." />
+    <div className="max-w-[820px] divide-y divide-[#c9c1b1] border-y border-[#c9c1b1]">
+      <section className="py-6">
+        <h2 className="serif text-[20px] font-semibold text-[#20392b]">1. Demonstration website</h2>
+        <p className="mt-2 text-sm leading-6 text-[#5e6258]">This version is an interactive demo, not an official booking or resident-management service. Room availability, notices, and contact details may be sample information. Confirm current details directly with hostel management before making plans or payments.</p>
+      </section>
+      <section className="py-6">
+        <h2 className="serif text-[20px] font-semibold text-[#20392b]">2. Maintenance reports</h2>
+        <p className="mt-2 text-sm leading-6 text-[#5e6258]">Reports submitted in this demo are saved in the browser being used and are not delivered to hostel management or shared with other devices. For real or urgent issues, contact the hostel directly using its confirmed contact details. Do not include sensitive personal information in a report.</p>
+      </section>
+      <section className="py-6">
+        <h2 className="serif text-[20px] font-semibold text-[#20392b]">3. Appropriate use</h2>
+        <p className="mt-2 text-sm leading-6 text-[#5e6258]">Use the website respectfully and provide accurate information. Do not attempt to disrupt the service, access another person’s information, or misuse its forms.</p>
+      </section>
+      <section className="py-6">
+        <h2 className="serif text-[20px] font-semibold text-[#20392b]">4. Review before live use</h2>
+        <p className="mt-2 text-sm leading-6 text-[#5e6258]">These terms are draft wording for the website demo. Hostel management should review and approve the final terms and contact details before the site is used as a live service.</p>
+      </section>
+    </div>
+    <Link href="/" data-testid="link-terms-home" className="mt-7 inline-flex border border-[#234633] bg-[#234633] px-5 py-3 text-sm font-bold text-[#f0eadc]">Back to home</Link>
+  </div>;
+}
+
 function NotFoundPage() {
   return <div className="mx-auto max-w-[1240px] px-5 py-24 text-center"><p className="text-xs font-bold uppercase tracking-[.18em] text-[#925039]">NOT FOUND</p><h1 className="serif mt-3 text-4xl font-semibold text-[#20392b]">We can’t find that page.</h1><Link href="/" data-testid="link-not-found-home" className="mt-6 inline-flex border border-[#234633] bg-[#234633] px-5 py-3 text-sm font-bold text-[#f0eadc]">Back home</Link></div>;
 }
@@ -431,6 +492,7 @@ function Router() {
       <Route path="/"><HomePage notices={notices} /></Route>
       <Route path="/rooms"><RoomsPage rooms={rooms} /></Route>
       <Route path="/report"><ReportPage onAdd={addComplaint} onToast={setToastMessage} /></Route>
+      <Route path="/terms"><TermsPage /></Route>
       <Route path="/manager">{managerAuthenticated
         ? <ManagerPage complaints={complaints} onStatus={updateReportStatus} notices={notices} onSaveNotice={saveNotice} onDeleteNotice={deleteNotice} rooms={rooms} onToggleRoom={toggleRoom} />
         : <ManagerLogin onLogin={login} />}</Route>
