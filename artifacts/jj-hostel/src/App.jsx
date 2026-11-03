@@ -15,6 +15,7 @@ const THEME_KEY = 'jj-hostel-demo-theme';
 // Replace these demo contact details with the hostel's confirmed information.
 const HOSTEL_PHONE = '+233 XX XXX XXXX';
 const HOSTEL_EMAIL = 'manager@example.com';
+const HOSTEL_MAP_URL = 'https://maps.app.goo.gl/ysz6p45BvRzKDSc47';
 const issueCategories = ['Plumbing', 'Electrical', 'Carpentry', 'General'];
 const roomNames = Array.from({ length: 67 }, (_, index) => `Room ${index + 1}`);
 const sampleReports = [
@@ -133,7 +134,7 @@ function AppShell({ children, managerMode, onSignOut }) {
           <span className="flex h-10 w-10 items-center justify-center border border-[#234633] text-[15px] font-bold tracking-[-.08em] text-[#234633]">J&amp;J</span>
           <span className="leading-tight">
             <span className="serif block text-[19px] font-bold tracking-[-.035em] text-[#20392b]">J &amp; J Hostel</span>
-            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[.19em] text-[#775344]">A good place to grow</span>
+            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[.19em] text-[#775344]">A good place to relax</span>
           </span>
         </Link>
         <div className="flex items-center gap-2">
@@ -207,6 +208,9 @@ function HomePage({ notices }) {
           <div className="mt-9 flex flex-wrap gap-3">
             <Link href="/rooms" data-testid="link-hero-check-rooms" className="inline-flex min-h-12 items-center justify-center border border-[#f0eadc] bg-[#f0eadc] px-5 py-3 text-[13px] font-bold text-[#1e432f]">Check room availability</Link>
             <Link href="/report" data-testid="link-hero-report-issue" className="inline-flex min-h-12 items-center justify-center border border-[#bdc6b6] px-5 py-3 text-[13px] font-semibold text-[#f0eadc]">Report an issue</Link>
+            <a href={HOSTEL_MAP_URL} target="_blank" rel="noopener noreferrer" data-testid="link-hero-google-maps"
+              aria-label="Open the J and J Hostel location on Google Maps, opens in a new tab"
+              className="inline-flex min-h-12 items-center justify-center px-2 py-3 text-[13px] font-semibold text-[#f0eadc] underline underline-offset-4">View on Google Maps</a>
           </div>
         </div>
         <div className="relative min-h-[250px] sm:min-h-[330px] lg:min-h-[390px]">
@@ -216,7 +220,7 @@ function HomePage({ notices }) {
     </section>
     <section className="mx-auto max-w-[1240px] px-5 py-16 md:px-9 md:py-[78px]">
       <div className="mb-7 flex flex-col justify-between gap-4 border-b border-[#c9c1b1] pb-5 sm:flex-row sm:items-end">
-        <div><p className="mb-2 text-[10px] font-bold uppercase tracking-[.2em] text-[#925039]">A LOOK AROUND</p><h2 className="serif text-[35px] font-semibold tracking-[-.04em] text-[#20392b]">Spaces for living and learning</h2></div>
+        <div><p className="mb-2 text-[10px] font-bold uppercase tracking-[.2em] text-[#925039]">A LOOK AROUND</p><h2 className="serif text-[35px] font-semibold tracking-[-.04em] text-[#20392b]">Spaces for living and relaxing</h2></div>
         <p className="max-w-[330px] text-xs leading-5 text-[#69675c]">Temporary sample imagery. Photos can be replaced with current hostel photography.</p>
       </div>
       <div className="grid gap-5 md:grid-cols-[1.15fr_1fr_1fr]">
@@ -233,7 +237,7 @@ function HomePage({ notices }) {
       <div className="md:sticky md:top-32 md:self-start">
         <p className="mb-3 text-[10px] font-bold uppercase tracking-[.2em] text-[#925039]">THE NOTICE BOARD</p>
         <h2 className="serif text-[36px] font-semibold leading-tight tracking-[-.04em] text-[#20392b]">A few things<br />to know.</h2>
-        <p className="mt-4 max-w-[300px] text-sm leading-6 text-[#5e6258]">Updates from the manager to help the house run smoothly.</p>
+        <p className="mt-4 max-w-[300px] text-sm leading-6 text-[#5e6258]">Updates from the manager to help the hsotel run smoothly.</p>
         <div className="mt-7 hidden items-center gap-2 text-xs font-semibold text-[#6b685d] md:flex"><span className="h-px w-8 bg-[#9a8c78]" />Updated regularly</div>
       </div>
       <div className="divide-y divide-[#c9c1b1] border-y border-[#c9c1b1]">
