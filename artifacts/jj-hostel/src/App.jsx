@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import bedroomPhoto from '@assets/generated_images/jj-hostel-placeholder-bedroom.jpg';
 import commonRoomPhoto from '@assets/generated_images/jj-hostel-placeholder-common-room.jpg';
 import exteriorPhoto from '@assets/generated_images/jj-hostel-placeholder-exterior.jpg';
+import hostelFrontPhoto from '@assets/hostel-front-optimized.webp';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -14,7 +15,6 @@ const THEME_KEY = 'jj-hostel-demo-theme';
 // Replace these demo contact details with the hostel's confirmed information.
 const HOSTEL_PHONE = '+233 XX XXX XXXX';
 const HOSTEL_EMAIL = 'manager@example.com';
-const HOSTEL_MAP_URL = 'https://maps.app.goo.gl/ysz6p45BvRzKDSc47';
 const issueCategories = ['Plumbing', 'Electrical', 'Carpentry', 'General'];
 const roomNames = Array.from({ length: 67 }, (_, index) => `Room ${index + 1}`);
 const sampleReports = [
@@ -163,9 +163,6 @@ function AppShell({ children, managerMode, onSignOut }) {
         <div>
           <p className="font-semibold tracking-wide text-[#344638]">J &amp; J Hostel <span className="font-normal text-[#775d4c]">· Accra, Ghana</span></p>
           <p className="mt-2">A comfortable place to study and settle in.</p>
-          <a href={HOSTEL_MAP_URL} target="_blank" rel="noopener noreferrer" data-testid="link-hostel-map"
-            aria-label="View the J and J Hostel location on Google Maps, opens in a new tab"
-            className="mt-2 inline-block border-b border-[#8e9a8b] pb-1 font-semibold text-[#344638]">View on Google Maps</a>
         </div>
         <div>
           <p className="font-bold uppercase tracking-[.14em] text-[#925039]">Contact the hostel</p>
@@ -212,9 +209,8 @@ function HomePage({ notices }) {
             <Link href="/report" data-testid="link-hero-report-issue" className="inline-flex min-h-12 items-center justify-center border border-[#bdc6b6] px-5 py-3 text-[13px] font-semibold text-[#f0eadc]">Report an issue</Link>
           </div>
         </div>
-        <div className="relative hidden min-h-[390px] lg:block">
-          <img src={exteriorPhoto} alt="Sample photo of the hostel exterior framed by tropical greenery." className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute bottom-5 right-5 border border-[#f0eadc]/70 bg-[#1e432f]/90 px-4 py-2 text-[9px] font-bold uppercase tracking-[.17em] text-[#f0eadc]">Temporary sample photo</div>
+        <div className="relative min-h-[250px] sm:min-h-[330px] lg:min-h-[390px]">
+          <img src={hostelFrontPhoto} alt="Front view of the J and J Hostel building and entrance." className="absolute inset-0 h-full w-full object-cover" />
         </div>
       </div>
     </section>
