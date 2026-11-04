@@ -13,7 +13,14 @@
     "@replit/connectors-sdk": "^0.4.3"
   },
   "devDependencies": {
+    "@rollup/rollup-darwin-x64": "^4.67.4",
+    "@tailwindcss/oxide-darwin-x64": "^4.3.4",
+    "lightningcss-darwin-x64": "^1.33.0",
     "prettier": "^3.9.10",
     "typescript": "~5.9.3"
+  },
+  "packageManager": "pnpm@10.16.1",
+  "engines": {
+    "node": ">=22.12.0"
   }
 }
