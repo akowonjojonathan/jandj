@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import bedroomPhoto from '@assets/generated_images/jj-hostel-placeholder-bedroom.jpg';
-import commonRoomPhoto from '@assets/generated_images/jj-hostel-placeholder-common-room.jpg';
-import exteriorPhoto from '@assets/generated_images/jj-hostel-placeholder-exterior.jpg';
+import bedroomPhoto from '@assets/jj-hostel-bedroom.webp';
+import bathroomPhoto from '@assets/jj-hostel-bathroom.webp';
+import kitchenPhoto from '@assets/jj-hostel-kitchen.webp';
 import hostelFrontPhoto from '@assets/hostel-front-optimized.webp';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -15,7 +15,6 @@ const THEME_KEY = 'jj-hostel-demo-theme';
 // Replace these demo contact details with the hostel's confirmed information.
 const HOSTEL_PHONE = '+233 XX XXX XXXX';
 const HOSTEL_EMAIL = 'manager@example.com';
-const HOSTEL_MAP_URL = 'https://maps.app.goo.gl/ysz6p45BvRzKDSc47';
 const issueCategories = ['Plumbing', 'Electrical', 'Carpentry', 'General'];
 const roomNames = Array.from({ length: 67 }, (_, index) => `Room ${index + 1}`);
 const sampleReports = [
@@ -194,9 +193,9 @@ function SectionHeading({ eyebrow, title, description }) {
 
 function HomePage({ notices }) {
   const gallery = [
-    { src: bedroomPhoto, alt: 'Sample hostel bedroom with two beds, a desk and green-trimmed windows.', title: 'A room to settle into', label: 'Bedroom' },
-    { src: commonRoomPhoto, alt: 'Sample shared study room with large tables, bookshelves and open windows.', title: 'Room to study together', label: 'Shared study room' },
-    { src: exteriorPhoto, alt: 'Sample hostel exterior with balconies and a leafy entrance.', title: 'A warm welcome home', label: 'Exterior' },
+    { src: bedroomPhoto, alt: 'A J and J Hostel bedroom with two beds, wardrobes, and a tiled floor.', title: 'A room to settle into', label: 'Bedroom' },
+    { src: bathroomPhoto, alt: 'The tiled bathroom at J and J Hostel, with a shower, sink, and toilet.', title: 'Bathroom facilities', label: 'Bathroom' },
+    { src: kitchenPhoto, alt: 'The hostel kitchen with a sink, storage cabinets, and cooking items.', title: 'A kitchen for everyday meals', label: 'Kitchen' },
   ];
   return <div>
     <section className="mx-auto max-w-[1240px] px-5 pt-8 md:px-9 md:pt-12">
@@ -208,9 +207,6 @@ function HomePage({ notices }) {
           <div className="mt-9 flex flex-wrap gap-3">
             <Link href="/rooms" data-testid="link-hero-check-rooms" className="inline-flex min-h-12 items-center justify-center border border-[#f0eadc] bg-[#f0eadc] px-5 py-3 text-[13px] font-bold text-[#1e432f]">Check room availability</Link>
             <Link href="/report" data-testid="link-hero-report-issue" className="inline-flex min-h-12 items-center justify-center border border-[#bdc6b6] px-5 py-3 text-[13px] font-semibold text-[#f0eadc]">Report an issue</Link>
-            <a href={HOSTEL_MAP_URL} target="_blank" rel="noopener noreferrer" data-testid="link-hero-google-maps"
-              aria-label="Open the J and J Hostel location on Google Maps, opens in a new tab"
-              className="inline-flex min-h-12 items-center justify-center px-2 py-3 text-[13px] font-semibold text-[#f0eadc] underline underline-offset-4">View on Google Maps</a>
           </div>
         </div>
         <div className="relative min-h-[250px] sm:min-h-[330px] lg:min-h-[390px]">
@@ -221,13 +217,12 @@ function HomePage({ notices }) {
     <section className="mx-auto max-w-[1240px] px-5 py-16 md:px-9 md:py-[78px]">
       <div className="mb-7 flex flex-col justify-between gap-4 border-b border-[#c9c1b1] pb-5 sm:flex-row sm:items-end">
         <div><p className="mb-2 text-[10px] font-bold uppercase tracking-[.2em] text-[#925039]">A LOOK AROUND</p><h2 className="serif text-[35px] font-semibold tracking-[-.04em] text-[#20392b]">Spaces for living and relaxing</h2></div>
-        <p className="max-w-[330px] text-xs leading-5 text-[#69675c]">Temporary sample imagery. Photos can be replaced with current hostel photography.</p>
+         <p className="max-w-[330px] text-xs leading-5 text-[#69675c]">Take a look inside the bedroom, bathroom, and kitchen at J and J Hostel.</p>
       </div>
       <div className="grid gap-5 md:grid-cols-[1.15fr_1fr_1fr]">
         {gallery.map((item, index) => <figure key={item.label} className="min-w-0">
           <div className={`relative overflow-hidden border border-[#c9c1b1] ${index === 0 ? 'aspect-[1.2] md:aspect-[1.05]' : 'aspect-[1.2]'}`}>
             <img src={item.src} alt={item.alt} className="h-full w-full object-cover" />
-            <span className="absolute left-3 top-3 bg-[#eee9dd] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[.12em] text-[#5d5a4f]">Temporary sample photo</span>
           </div>
           <figcaption className="border-b border-[#c9c1b1] py-3"><p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#925039]">{item.label}</p><p className="serif mt-1 text-[20px] font-semibold text-[#20392b]">{item.title}</p></figcaption>
         </figure>)}
